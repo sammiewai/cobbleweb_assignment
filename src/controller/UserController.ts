@@ -25,13 +25,7 @@ export class UserController {
     }
 
     async save(request: Request, response: Response, next: NextFunction) {
-        const { firstName, lastName, age } = request.body;
-
-        const user = Object.assign(new User(), {
-            firstName,
-            lastName,
-            age
-        })
+        const user = request.body
 
         return this.userRepository.save(user)
     }
@@ -48,6 +42,14 @@ export class UserController {
         await this.userRepository.remove(userToRemove)
 
         return "user has been removed"
+    }
+
+    async login(request: Request, response: Response, next: NextFunction) {
+        const user = request.body
+
+        //return this.userRepository.save(user)
+
+        return {"message": "test login"}
     }
 
 }
