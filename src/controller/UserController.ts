@@ -2,31 +2,14 @@ import { AppDataSource } from "../data-source"
 import { NextFunction, Request, Response } from "express"
 import { User } from "../entity/User"
 import { secret } from "../config/authConfig"
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const ttl = 86400; // Expires in 24 hours
+import * as jwt from "jsonwebtoken";
+import * as bcrypt from "bcryptjs";
+
+const ttl = 3600; // Expires in 1 hour
 
 export class UserController {
 
     private userRepository = AppDataSource.getRepository(User)
-
-    async all(request: Request, response: Response, next: NextFunction) {
-        return this.userRepository.find()
-    }
-
-    async one(request: Request, response: Response, next: NextFunction) {
-        const id = parseInt(request.params.id)
-
-
-        const user = await this.userRepository.findOne({
-            where: { id }
-        })
-
-        if (!user) {
-            return "unregistered user"
-        }
-        return user
-    }
 
     // Register
     async save(request: Request, response: Response, next: NextFunction) {
@@ -41,20 +24,6 @@ export class UserController {
         }
 
         return { "message": `${user.email} successfully saved!` }
-    }
-
-    async remove(request: Request, response: Response, next: NextFunction) {
-        const id = parseInt(request.params.id)
-
-        let userToRemove = await this.userRepository.findOneBy({ id })
-
-        if (!userToRemove) {
-            return "this user not exist"
-        }
-
-        await this.userRepository.remove(userToRemove)
-
-        return "user has been removed"
     }
 
     // Login
@@ -95,7 +64,13 @@ export class UserController {
             id: user.id,
             username: `${user.firstName} ${user.lastName}`,
             email: user.email,
-            accessToken: token
+            accessToken: token,
+            validity: ttl
         }
+    }
+
+    // Get client details
+    async profile(request: Request, response: Response, next: NextFunction) {
+        return { "message": `profile fetched` }
     }
 }
