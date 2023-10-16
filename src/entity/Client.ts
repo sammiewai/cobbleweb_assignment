@@ -1,5 +1,5 @@
-import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
-import {User} from "./User";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
+import { User } from "./User";
 
 @Entity()
 export class Client {
@@ -9,11 +9,10 @@ export class Client {
     @Column()
     avatar: string
 
-    @Column("text", {array: true})
+    @Column("text", { array: true })
     photos: string[]
 
-    @OneToMany(() => User, (user) => user.id, {
-        cascade: true
-    })
-    user: User
+    @OneToOne(() => User, (user) => user.id, { cascade: true })
+    @JoinColumn()
+    user: User;
 }

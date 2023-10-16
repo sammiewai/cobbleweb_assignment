@@ -14,8 +14,9 @@ const verifyToken = (req, res, next) => {
         secret,
         (err, decoded) => {
             if (err) {
+                let msg:String = err?.message || "Unauthorized";
                 return res.status(401).send({
-                    message: "Unauthorized!",
+                    message: msg,
                 });
             }
             req.userId = decoded.id;

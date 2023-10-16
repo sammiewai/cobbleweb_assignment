@@ -1,6 +1,8 @@
 import { AppDataSource } from "../data-source"
 import { NextFunction, Request, Response } from "express"
 import { User } from "../entity/User"
+import { Photo } from "../entity/Photo"
+import { Client } from "../entity/Client"
 import { secret } from "../config/authConfig"
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
@@ -10,20 +12,42 @@ const ttl = 3600; // Expires in 1 hour
 export class UserController {
 
     private userRepository = AppDataSource.getRepository(User)
+    private clientRepository = AppDataSource.getRepository(Client)
+    private photoRepository = AppDataSource.getRepository(Photo)
 
     // Register
     async save(request: Request, response: Response, next: NextFunction) {
-        // Hash password
-        const user = { ...request.body }
-        user.password = bcrypt.hashSync(user.password, 8)
+        const { firstName, lastName, email, password, role, active } = request.body;
+        /**
+         * 0. Save the user details first to get user id
+         * 1. Save client photo avatar and path urls as arrays
+         * 2. For each photo in the array, save the details in the photos table
+         */
 
-        const saved = this.userRepository.save(user);
+        // User details
+        const user: User = new User();
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.email = email;
+        user.password = bcrypt.hashSync(password, 8); // Hash password
+        user.role = role;
 
-        if (!saved) {
-            return { "message": "An error occured while registering the user. Kindly check." }
-        }
+        // Client details
+        let photos: string[] = [];
+        photos.push("/local/test/photo1.jpg")
+        photos.push("/local/test/photo2.jpg")
+        photos.push("/local/test/photo3.jpg")
+        photos.push("/local/test/photo4.jpg")
 
-        return { "message": `${user.email} successfully saved!` }
+        const client: Client = new Client();
+        client.avatar = "https://i.pravatar.cc/200";
+        client.photos = photos;
+        client.user = user;
+
+        await this.clientRepository.save(client);
+        // TODO: Save photo details
+
+        return { "message": `${email} successfully saved!` }
     }
 
     // Login
@@ -67,10 +91,5 @@ export class UserController {
             accessToken: token,
             validity: ttl
         }
-    }
-
-    // Get client details
-    async profile(request: Request, response: Response, next: NextFunction) {
-        return { "message": `profile fetched` }
     }
 }

@@ -1,5 +1,5 @@
-import {Column, Entity, CreateDateColumn, PrimaryGeneratedColumn} from "typeorm";
-
+import { Column, Entity, CreateDateColumn, PrimaryGeneratedColumn, OneToOne, JoinColumn } from "typeorm";
+import { User } from "./User";
 @Entity()
 
 export class Photo {
@@ -12,12 +12,13 @@ export class Photo {
     @Column()
     url: string
 
-    @Column()
-    user: number
-
     @CreateDateColumn()
     createdAt: Date
 
     @CreateDateColumn()
     updatedAt: Date
+
+    @OneToOne(() => User, (user) => user.id, { cascade: true })
+    @JoinColumn()
+    user: User;
 }
