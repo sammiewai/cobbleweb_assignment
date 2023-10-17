@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import * as express from 'express'
 import { type Request, type Response } from 'express'
 import { AppDataSource } from './data-source'
@@ -46,6 +47,6 @@ AppDataSource.initialize().then(async () => {
   })
 
   // start express server
-  app.listen(3000)
+  app.listen(process.env.APP_PORT)
   console.log('Express server has started on port 3000.')
 }).catch(error => { console.log(error) })
