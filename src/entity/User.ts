@@ -1,23 +1,27 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, OneToMany } from 'typeorm'
+import { IsEmail, Length, IsAlphanumeric } from 'class-validator'
 import { Client } from './Client'
 import { Photo } from './Photo'
 @Entity()
 export class User {
-  // TODO: Set min values and password At least contains 1 number
-
   @PrimaryGeneratedColumn()
     id: number
 
-  @Column({ type: 'varchar', length: 25 })
+  @Column()
+  @Length(2, 25)
     firstName: string
 
-  @Column({ type: 'varchar', length: 25 })
+  @Column()
+  @Length(2, 25)
     lastName: string
 
   @Column({ type: 'varchar', unique: true })
+  @IsEmail()
     email: string
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column()
+  @Length(6, 100)
+  @IsAlphanumeric()
     password: string
 
   @Column('varchar', { default: 'user' })

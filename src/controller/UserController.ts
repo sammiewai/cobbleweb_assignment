@@ -8,6 +8,7 @@ import { secret } from '../config/authConfig'
 import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import fileUpload from '../helpers/fileUpload'
+import { validate } from 'class-validator'
 
 const ttl = 3600 // Expires in 1 hour
 
@@ -56,8 +57,20 @@ export class UserController {
     client.photos = photoPaths
     client.user = user
 
-    // Save the user-client relationship
-    await this.clientRepository.save(client)
+    // Save the user-client relationship..do validation
+    const errors = await validate(user, { validationError: { target: false, value: false } })
+    if (errors.length > 0) {
+      logger.error(`User entity failed validation. Error(s): ${JSON.stringify(errors)}`)
+
+      // Format error
+      const errorMap = errors.map((val) => {
+        return { field: val.property, errorMap: val.constraints }
+      })
+
+      return { status: 'failed', errorMap }
+    } else {
+      await this.clientRepository.save(client)
+    }
 
     // Save the photo details
     if (Array.isArray(paths) && paths.length > 0) {
