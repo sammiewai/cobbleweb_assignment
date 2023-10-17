@@ -6,23 +6,38 @@ import { Client } from "../entity/Client"
 import { secret } from "../config/authConfig"
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
+import fileUpload from "../helpers/fileUpload"
 
 const ttl = 3600; // Expires in 1 hour
 
 export class UserController {
+    /**
+        * Registers a new user
+        * 
+        * @param request 
+        * @param response 
+        * @param next 
+        * @returns 
+    */
 
     private userRepository = AppDataSource.getRepository(User)
     private clientRepository = AppDataSource.getRepository(Client)
     private photoRepository = AppDataSource.getRepository(Photo)
 
-    // Register
     async save(request: Request, response: Response, next: NextFunction) {
-        const { firstName, lastName, email, password, role, active } = request.body;
-        /**
-         * 0. Save the user details first to get user id
-         * 1. Save client photo avatar and path urls as arrays
-         * 2. For each photo in the array, save the details in the photos table
-         */
+        const { firstName, lastName, email, password, role, active, images } = request.body;
+
+        // 0. Save the images and get the uploaded paths
+        const paths = await fileUpload(images);
+
+        // Get paths
+        let photo_paths = [];
+
+        if (Array.isArray(paths) && paths.length > 0) {
+            paths.forEach((val) => {
+                photo_paths.push(val.path)
+            })
+        }
 
         // User details
         const user: User = new User();
@@ -31,21 +46,30 @@ export class UserController {
         user.email = email;
         user.password = bcrypt.hashSync(password, 8); // Hash password
         user.role = role;
+        user.active = active;
 
         // Client details
-        let photos: string[] = [];
-        photos.push("/local/test/photo1.jpg")
-        photos.push("/local/test/photo2.jpg")
-        photos.push("/local/test/photo3.jpg")
-        photos.push("/local/test/photo4.jpg")
-
         const client: Client = new Client();
         client.avatar = "https://i.pravatar.cc/200";
-        client.photos = photos;
+        client.photos = photo_paths;
         client.user = user;
 
+        // Save the user-client relationship
         await this.clientRepository.save(client);
-        // TODO: Save photo details
+
+        // Save the photo details
+        if (Array.isArray(paths) && paths.length > 0) {
+            const photo: Photo = new Photo();
+
+            for (const path of paths) {
+                photo.name = path.name;
+                photo.url = path.path;
+                photo.user = user;
+
+                this.photoRepository.save(photo);
+            }
+        }
+
 
         return { "message": `${email} successfully saved!` }
     }

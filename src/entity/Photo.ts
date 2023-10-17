@@ -1,4 +1,4 @@
-import { Column, Entity, CreateDateColumn, PrimaryGeneratedColumn, OneToOne, JoinColumn } from "typeorm";
+import { Column, Entity, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
 import { User } from "./User";
 @Entity()
 
@@ -18,7 +18,6 @@ export class Photo {
     @CreateDateColumn()
     updatedAt: Date
 
-    @OneToOne(() => User, (user) => user.id, { cascade: true })
-    @JoinColumn()
-    user: User;
+    @ManyToOne(() => User, (user) => user.photos, { cascade: true })
+    user: User
 }

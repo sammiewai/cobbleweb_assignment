@@ -1,16 +1,13 @@
 import * as express from "express"
-import * as bodyParser from "body-parser"
 import { Request, Response } from "express"
 import { AppDataSource } from "./data-source"
 import { Routes } from "./routes"
 import { User } from "./entity/User"
-import verifyToken from "./middleware/authJwt";
+import verifyToken from "./middleware/authJwt"
 
 AppDataSource.initialize().then(async () => {
-
-    // create express app
     const app = express()
-    app.use(bodyParser.json())
+    app.use(express.json({ limit: '100mb' }))
 
     // Protected routes
     app.use(function (req, res, next) {
@@ -27,11 +24,11 @@ AppDataSource.initialize().then(async () => {
         async (req, res, next) => {
             // User profile relevant data
             const user = await AppDataSource.getRepository(User)
-            .createQueryBuilder("user")
-            .select(['user.firstName AS firstName', 'user.lastName AS lastName', 'user.email AS email', 'user.role AS role', 'user.active AS active'])
-            .where("user.id = :id", { id: req.userId })
-            .getRawOne();
-            
+                .createQueryBuilder("user")
+                .select(['user.firstName AS firstName', 'user.lastName AS lastName', 'user.email AS email', 'user.role AS role', 'user.active AS active'])
+                .where("user.id = :id", { id: req.userId })
+                .getRawOne();
+
             res.json(user);
         }
     );
@@ -51,7 +48,5 @@ AppDataSource.initialize().then(async () => {
 
     // start express server
     app.listen(3000)
-
     console.log("Express server has started on port 3000.")
-
 }).catch(error => console.log(error))

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, OneToMany } from "typeorm"
 import { Client } from "./Client";
 import { Photo } from "./Photo";
 @Entity()
@@ -35,6 +35,6 @@ export class User {
     @OneToOne(() => Client, (client) => client.id)
     client: Client;
 
-    @OneToOne(() => Photo, (photo) => photo.id)
-    photo: Photo;
+    @OneToMany(() => Photo, (photo) => photo.user)
+    photos: Photo[]
 }
