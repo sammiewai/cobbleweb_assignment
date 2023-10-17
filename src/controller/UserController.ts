@@ -1,3 +1,4 @@
+import logger from '../helpers/logger'
 import { AppDataSource } from '../data-source'
 import { type NextFunction, type Request, type Response } from 'express'
 import { User } from '../entity/User'
@@ -26,19 +27,20 @@ export class UserController {
 
   async save (request: Request, response: Response, next: NextFunction) {
     const { firstName, lastName, email, password, role, active, images } = request.body
-
+    logger.info(`Register request received. Email: ${email}`)
     // 0. Save the images and get the uploaded paths
     const paths = await fileUpload(images)
 
     // Get paths
-    const photo_paths: any = []
+    const photoPaths: any = []
 
     if (Array.isArray(paths) && paths.length > 0) {
       paths.forEach((val) => {
-        photo_paths.push(val.path)
+        photoPaths.push(val.path)
       })
     }
 
+    logger.info(`Saving user-client details. Email: ${email}`)
     // User details
     const user: User = new User()
     user.firstName = firstName
@@ -51,7 +53,7 @@ export class UserController {
     // Client details
     const client: Client = new Client()
     client.avatar = 'https://i.pravatar.cc/200'
-    client.photos = photo_paths
+    client.photos = photoPaths
     client.user = user
 
     // Save the user-client relationship
@@ -59,6 +61,7 @@ export class UserController {
 
     // Save the photo details
     if (Array.isArray(paths) && paths.length > 0) {
+      logger.info(`Saving the clients photos. Email: ${email}`)
       const photo: Photo = new Photo()
 
       for (const path of paths) {
@@ -70,6 +73,7 @@ export class UserController {
       }
     }
 
+    logger.info(`User successfully registered. Email: ${email}`)
     return { message: `${email} successfully saved!` }
   }
 
@@ -77,12 +81,15 @@ export class UserController {
   async login (request: Request, response: Response, next: NextFunction) {
     // 1. Check if user exists by email
     const { email, password } = request.body
+    logger.info(`Login request received. Email: ${email}`)
     const user = await this.userRepository.findOne({
       where: { email }
     })
 
     if (!user) {
-      return { message: `User with email \'${email}\' does not exist.` }
+      const errMsg = `User with email \'${email}\' does not exist.`
+      logger.error(errMsg)
+      return { message: errMsg }
     }
 
     // 2. Check if valid password
@@ -92,9 +99,11 @@ export class UserController {
     )
 
     if (!passwordIsValid) {
+      const errMsg = `Invalid password for email \'${email}\'`
+      logger.error(errMsg)
       return {
         accessToken: null,
-        message: 'Invalid Password!'
+        message: errMsg
       }
     }
 
@@ -106,7 +115,7 @@ export class UserController {
         allowInsecureKeySizes: true,
         expiresIn: ttl
       })
-
+    logger.info(`User successfully logged in. Email: ${email}`)
     return {
       id: user.id,
       username: `${user.firstName} ${user.lastName}`,

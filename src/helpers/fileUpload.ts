@@ -5,9 +5,11 @@
  * @returns [paths]
  */
 
+import logger from './logger'
 const fs = require('fs')
 
 const fileUpload = (images) => {
+  logger.info('Request to upload the images received')
   const paths: any = []
   if (images && images != '' && Array.isArray(images)) {
     images.map((val) => {
@@ -29,16 +31,18 @@ const fileUpload = (images) => {
 
         // Do the upload
         fs.writeFile(path, bitmap, (err) => {
-          if (err) { console.error(`Failed to uploaded the images. Error ${err}`) } else {
-            console.log(`Successfully uploaded the image. Path: ${path}`)
+          if (err) {
+            logger.error(`Failed to uploaded the images. Error ${err}`)
+          } else {
+            logger.info(`Successfully uploaded the image. Path: ${path}`)
           }
         })
       } else {
-        console.error('Invalid Base64 image string.')
+        logger.error('Invalid Base64 image string passed. Kindly check.')
       }
     })
   } else {
-    console.error('No images to process.')
+    logger.error('No images in the request to process.')
   }
 
   return paths

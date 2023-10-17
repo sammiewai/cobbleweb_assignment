@@ -22,6 +22,7 @@
       "jsonwebtoken": "^9.0.2",
       "pg": "^8.4.0",
       "reflect-metadata": "^0.1.13",
+      "simple-node-logger": "^21.8.12",
       "typeorm": "0.3.17"
    },
    "scripts": {

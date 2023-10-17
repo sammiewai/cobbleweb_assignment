@@ -5,6 +5,7 @@ import { AppDataSource } from './data-source'
 import { Routes } from './routes'
 import { User } from './entity/User'
 import verifyToken from './middleware/authJwt'
+import logger from './helpers/logger'
 
 AppDataSource.initialize().then(async () => {
   const app = express()
@@ -47,6 +48,7 @@ AppDataSource.initialize().then(async () => {
   })
 
   // start express server
-  app.listen(process.env.APP_PORT)
-  console.log('Express server has started on port 3000.')
+  const PORT = process.env.APP_PORT
+  app.listen(PORT)
+  logger.info(`Server started on port ${PORT}`)
 }).catch(error => { console.log(error) })
