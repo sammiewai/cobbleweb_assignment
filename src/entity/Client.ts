@@ -1,18 +1,18 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
-import { User } from "./User";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm'
+import { User } from './User'
 
 @Entity()
 export class Client {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+    id: number
 
-    @Column()
+  @Column()
     avatar: string
 
-    @Column("text", { array: true })
+  @Column('text', { array: true })
     photos: string[]
 
-    @OneToOne(() => User, (user) => user.id, { cascade: true })
-    @JoinColumn()
-    user: User;
+  @OneToOne(() => User, (user) => user.id, { cascade: true })
+  @JoinColumn()
+    user: User
 }

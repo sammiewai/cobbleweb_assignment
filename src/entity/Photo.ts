@@ -1,23 +1,23 @@
-import { Column, Entity, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
-import { User } from "./User";
+import { Column, Entity, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { User } from './User'
 @Entity()
 
 export class Photo {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+    id: number
 
-    @Column()
+  @Column()
     name: string
 
-    @Column()
+  @Column()
     url: string
 
-    @CreateDateColumn()
+  @CreateDateColumn()
     createdAt: Date
 
-    @CreateDateColumn()
+  @CreateDateColumn()
     updatedAt: Date
 
-    @ManyToOne(() => User, (user) => user.photos, { cascade: true })
+  @ManyToOne(() => User, (user) => user.photos, { cascade: true })
     user: User
 }

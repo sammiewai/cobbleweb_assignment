@@ -1,1 +1,1 @@
-export const secret = "sample-secret-key";
+export const secret = 'sample-secret-key'
