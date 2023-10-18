@@ -9,6 +9,7 @@ import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import fileUpload from '../helpers/fileUpload'
 import { validate } from 'class-validator'
+import { validatePassword } from '../helpers/validator'
 
 const ttl = 3600 // Expires in 1 hour
 
@@ -29,6 +30,18 @@ export class UserController {
   async save (request: Request, response: Response, next: NextFunction) {
     const { firstName, lastName, email, password, role, active, images } = request.body
     logger.info(`Register request received. Email: ${email}`)
+
+    /**
+     * Validate the password
+     * We cannot use the entity check because we are encrypting the password which changes it from alphanumeric
+    */
+    const isValidPass = await validatePassword(password)
+    if (!isValidPass) {
+      logger.error(`Password verification failed for user: ${email}`)
+      response.status(400); return { success: false, error: [{ message: 'Password should be between 6 and 50 characters long with at least 1 digit' }] }
+    }
+    logger.info(`Password validated successfully for user: ${email}. Proceeding with registration.`)
+
     // 0. Save the images and get the uploaded paths
     const paths = await fileUpload(images)
 
@@ -58,16 +71,16 @@ export class UserController {
     client.user = user
 
     // Save the user-client relationship..do validation
-    const errors = await validate(user, { validationError: { target: false, value: false } })
-    if (errors.length > 0) {
-      logger.error(`User entity failed validation. Error(s): ${JSON.stringify(errors)}`)
+    const validations = await validate(user, { validationError: { target: false, value: false } })
+    if (validations.length > 0) {
+      logger.error(`User entity failed validation. Error(s): ${JSON.stringify(validations)}`)
 
       // Format error
-      const errorMap = errors.map((val) => {
-        return { field: val.property, errorMap: val.constraints }
+      const error = validations.map((val) => {
+        return { field: val.property, error: val.constraints }
       })
 
-      return { status: 'failed', errorMap }
+      response.status(400); return { success: false, error }
     } else {
       await this.clientRepository.save(client)
     }
@@ -82,12 +95,12 @@ export class UserController {
         photo.url = path.path
         photo.user = user
 
-        this.photoRepository.save(photo)
+        void this.photoRepository.save(photo)
       }
     }
 
     logger.info(`User successfully registered. Email: ${email}`)
-    return { message: `${email} successfully saved!` }
+    response.status(201); return { success: true, message: `${email} successfully registered!` }
   }
 
   // Login
@@ -99,24 +112,29 @@ export class UserController {
       where: { email }
     })
 
-    if (!user) {
-      const errMsg = `User with email \'${email}\' does not exist.`
+    if (user === null) {
+      const errMsg = `Invalid email or user with email '${email}' does not exist.`
       logger.error(errMsg)
-      return { message: errMsg }
+
+      response.status(403); return { success: false, message: errMsg }
     }
 
     // 2. Check if valid password
-    const passwordIsValid = bcrypt.compareSync(
+    const passwordIsValid: boolean = bcrypt.compareSync(
       password,
       user.password
     )
 
     if (!passwordIsValid) {
-      const errMsg = `Invalid password for email \'${email}\'`
-      logger.error(errMsg)
-      return {
-        accessToken: null,
-        message: errMsg
+      const errMsg = 'Invalid password entered. Kindly check.'
+      logger.error(`${errMsg} Email: test1@test.com`)
+
+      response.status(401); return {
+        success: false,
+        data: {
+          accessToken: null,
+          message: errMsg
+        }
       }
     }
 
@@ -130,11 +148,14 @@ export class UserController {
       })
     logger.info(`User successfully logged in. Email: ${email}`)
     return {
-      id: user.id,
-      username: `${user.firstName} ${user.lastName}`,
-      email: user.email,
-      accessToken: token,
-      validity: ttl
+      success: true,
+      data: {
+        id: user.id,
+        username: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        accessToken: token,
+        validity: ttl
+      }
     }
   }
 }

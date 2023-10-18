@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, OneToMany } from 'typeorm'
-import { IsEmail, Length, IsAlphanumeric } from 'class-validator'
+import { IsEmail, Length, IsAlphanumeric, Matches } from 'class-validator'
 import { Client } from './Client'
 import { Photo } from './Photo'
 @Entity()
@@ -21,7 +21,6 @@ export class User {
 
   @Column()
   @Length(6, 100)
-  @IsAlphanumeric()
     password: string
 
   @Column('varchar', { default: 'user' })
