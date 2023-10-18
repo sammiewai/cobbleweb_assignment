@@ -27,9 +27,11 @@ AppDataSource.initialize().then(async () => {
       // User profile relevant data
       const user = await AppDataSource.getRepository(User)
         .createQueryBuilder('user')
-        .select(['user.firstName AS firstName', 'user.lastName AS lastName', 'user.email AS email', 'user.role AS role', 'user.active AS active'])
-        .where('user.id = :id', { id: req.userId })
-        .getRawOne()
+        .select(['user.firstName', 'user.lastName', 'user.email', 'user.role', 'user.active', 'client.avatar', 'client.photos', 'photo.name', 'photo.url'])
+        .leftJoin('user.client', 'client')
+        .leftJoin('user.photos', 'photo')
+        .where('user.id = :id', { id: 1 })
+        .getOne()
 
       res.json(user)
     }

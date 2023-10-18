@@ -12,7 +12,7 @@ export class Client {
   @Column('text', { array: true })
     photos: string[]
 
-  @OneToOne(() => User, (user) => user.id, { cascade: true })
+  @OneToOne(() => User, (user) => user.client, { cascade: true })
   @JoinColumn()
     user: User
 }

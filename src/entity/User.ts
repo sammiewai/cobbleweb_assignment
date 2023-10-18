@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToOne, OneToMany } from 'typeorm'
-import { IsEmail, Length, IsAlphanumeric, Matches } from 'class-validator'
+import { IsEmail, Length } from 'class-validator'
 import { Client } from './Client'
 import { Photo } from './Photo'
 @Entity()
@@ -35,7 +35,7 @@ export class User {
   @CreateDateColumn()
     updatedAt: Date
 
-  @OneToOne(() => Client, (client) => client.id)
+  @OneToOne(() => Client, (client) => client.user)
     client: Client
 
   @OneToMany(() => Photo, (photo) => photo.user)
