@@ -33,7 +33,11 @@ AppDataSource.initialize().then(async () => {
         .where('user.id = :id', { id: 1 })
         .getOne()
 
-      res.json(user)
+      let success: boolean = false
+      if (user !== null) {
+        success = true
+      }
+      res.json({ success, data: user })
     }
   )
 
