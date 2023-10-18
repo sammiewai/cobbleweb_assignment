@@ -1,6 +1,7 @@
-import { secret } from '../config/authConfig'
 import * as jwt from 'jsonwebtoken'
 import logger from '../helpers/logger'
+
+const secret = process.env.TOKEN_SECRET
 
 /**
  * Verifies the JWT

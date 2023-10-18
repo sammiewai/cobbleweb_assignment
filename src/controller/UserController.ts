@@ -1,17 +1,21 @@
+import 'dotenv/config'
 import logger from '../helpers/logger'
 import { AppDataSource } from '../data-source'
 import { type NextFunction, type Request, type Response } from 'express'
 import { User } from '../entity/User'
 import { Photo } from '../entity/Photo'
 import { Client } from '../entity/Client'
-import { secret } from '../config/authConfig'
 import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import fileUpload from '../helpers/fileUpload'
 import { validate } from 'class-validator'
 import { validatePassword } from '../helpers/validator'
 
-const ttl = 3600 // Expires in 1 hour
+let ttl: number = 1800
+
+if (process.env.TOKEN_TTL !== undefined) {
+  ttl = process.env.TOKEN_TTL !== '' ? parseInt(process.env.TOKEN_TTL) : ttl // Expires in 1 hour
+}
 
 export class UserController {
   /**
@@ -140,7 +144,7 @@ export class UserController {
 
     // 3. If all well, respond with access token
     const token = jwt.sign({ id: user.id },
-      secret,
+      process.env.TOKEN_SECRET,
       {
         algorithm: 'HS256',
         allowInsecureKeySizes: true,
