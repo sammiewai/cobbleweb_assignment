@@ -10,7 +10,7 @@ const secret = process.env.TOKEN_SECRET
  * @param next
  * @returns
  */
-const verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next): any => {
   const token: string = req.headers['x-access-token']
 
   if (token === '') {
@@ -25,8 +25,8 @@ const verifyToken = (req, res, next) => {
   jwt.verify(token,
     secret,
     (err, decoded) => {
-      if (err) {
-        const msg: string = err?.message || 'Unauthorized'
+      if (err !== null) {
+        const msg: string = err?.message !== null ? err?.message : 'Unauthorized'
         logger.error(msg)
         return res.status(401).send({
           success: false,

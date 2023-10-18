@@ -31,7 +31,7 @@ export class UserController {
   private readonly clientRepository = AppDataSource.getRepository(Client)
   private readonly photoRepository = AppDataSource.getRepository(Photo)
 
-  async save (request: Request, response: Response, next: NextFunction) {
+  async save (request: Request, response: Response, next: NextFunction): Promise<any> {
     const { firstName, lastName, email, password, role, active, images } = request.body
     logger.info(`Register request received. Email: ${email}`)
 
@@ -108,7 +108,7 @@ export class UserController {
   }
 
   // Login
-  async login (request: Request, response: Response, next: NextFunction) {
+  async login (request: Request, response: Response, next: NextFunction): Promise<any> {
     // 1. Check if user exists by email
     const { email, password } = request.body
     logger.info(`Login request received. Email: ${email}`)

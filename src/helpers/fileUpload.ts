@@ -8,11 +8,11 @@
 import logger from './logger'
 import * as fs from 'fs'
 
-const fileUpload = (images) => {
+const fileUpload = (images): any => {
   logger.info('Request to upload the images received')
   const paths: any = []
   if (images !== '' && Array.isArray(images)) {
-    images.map((val) => {
+    images.forEach((val) => {
       const { file, name } = val
       const image = file
       const getChar = image.charAt(0)
@@ -31,8 +31,8 @@ const fileUpload = (images) => {
 
         // Do the upload
         fs.writeFile(path, bitmap, (err) => {
-          if (err) {
-            logger.error(`Failed to uploaded the images. Error ${err}`)
+          if (err !== null) {
+            logger.error(`Failed to uploaded the images. Error ${JSON.stringify(err)}`)
           } else {
             logger.info(`Successfully uploaded the image. Path: ${path}`)
           }
